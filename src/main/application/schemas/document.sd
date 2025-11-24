@@ -1,0 +1,53 @@
+schema document {
+    document document {
+        field id type string {
+            indexing: summary | attribute
+        }
+        field title type string {
+            indexing: index | summary
+            index: enable-bm25
+        }
+        field content type string {
+            indexing: index | summary
+            index: enable-bm25
+        }
+        field category type string {
+            indexing: attribute | summary
+        }
+        field embedding type tensor<float>(d0[384]) {
+            indexing: attribute | index
+            attribute {
+                distance-metric: euclidean
+            }
+        }
+    }
+    
+    fieldset default {
+        fields: title, content
+    }
+    
+    rank-profile hybrid inherits default {
+        first-phase {
+            expression: nativeRank(title, content)
+        }
+        second-phase {
+            expression: 0.6 * firstPhase + 0.4 * closeness(field, embedding)
+        }
+        rank-properties {
+            query(threshold): 0.5
+        }
+    }
+    
+    rank-profile semantic inherits default {
+        first-phase {
+            expression: closeness(field, embedding)
+        }
+    }
+    
+    rank-profile keyword inherits default {
+        first-phase {
+            expression: nativeRank(title, content)
+        }
+    }
+}
+

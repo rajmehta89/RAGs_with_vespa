@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  vespa:
+    image: vespaengine/vespa
+    container_name: vespa
+    hostname: vespa
+    ports:
+      - "8080:8080"
+      - "19071:19071"
+    mem_limit: 4g
+
+  java-app:
+    image: raj153/vespa-hybrid-search:latest
+    container_name: vespa-java-app
+    depends_on:
+      - vespa
+    environment:
+      - VESPA_ENDPOINT=http://vespa:8080
+
