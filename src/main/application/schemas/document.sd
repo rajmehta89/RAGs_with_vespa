@@ -26,28 +26,28 @@ schema document {
         fields: title, content
     }
     
-    rank-profile hybrid inherits default {
+    rank-profile default {
         first-phase {
             expression: nativeRank(title, content)
         }
+    }
+    
+    rank-profile hybrid inherits default {
         second-phase {
-            expression: 0.6 * firstPhase + 0.4 * closeness(field, embedding)
+            expression: 0.6 * firstPhase + 0.4 * closeness(embedding,query_embedding)
         }
         rank-properties {
             query(threshold): 0.5
         }
     }
     
-    rank-profile semantic inherits default {
+    rank-profile semantic {
         first-phase {
-            expression: closeness(field, embedding)
+            expression: closeness(embedding,query_embedding)
         }
     }
     
     rank-profile keyword inherits default {
-        first-phase {
-            expression: nativeRank(title, content)
-        }
     }
 }
 
